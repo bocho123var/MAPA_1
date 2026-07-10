@@ -1,0 +1,52 @@
+{
+  "nombre": "GIS Dashboard",
+  "version": "1.0",
+  "centro": [22.7500, -100.7500],
+  "zoom": 7,
+  "capas": [
+    {
+      "id": "municipios_slp",
+      "nombre": "Municipios SLP",
+      "archivo": "data/slpmun.geojson",
+      "tipo": "geojson",
+      "visible": true,
+      "color": "#4CAF50",
+      "opacidad": 0.6,
+      "popup": ["NOMMUN", "CVEGEO"],
+      "etiquetas": ["Municipio:", "Clave:"]
+    },
+    {
+      "id": "slpusyv7",
+      "nombre": "Uso de Suelo y Vegetación (SLP)",
+      "archivo": "data/slpusyv7.geojson",
+      "tipo": "geojson",
+      "visible": false,
+      "color": "#2196F3",
+      "opacidad": 0.4,
+      "popup": ["DESCRIPCIO", "COV_"],
+      "etiquetas": ["NOMBRE:", "COV:"]
+    },
+    {
+      "id": "Rios",
+      "nombre": "Ríos",
+      "archivo": "data/slphidro.geojson",
+      "tipo": "geojson",
+      "visible": false,
+      "color": "#e74c3c",
+      "opacidad": 0.8,
+      "popup": ["NOMBRES", "LENGTH"],
+      "etiquetas": ["Nombre:", "Longitud:"]
+    },
+    {
+      "id": "localidaes",
+      "nombre": "localidades",
+      "archivo": "data/lslploc.geojson",
+      "tipo": "geojson",
+      "visible": false,
+      "color": "#FF9800",
+      "opacidad": 1,
+      "popup": ["NOMMUN", "NOMGEO","CVEGEO"],
+      "etiquetas": ["Nombre municipio:", "Nombre localidad:","Clave:"]
+    }
+  ]
+}

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
+    <title>GIS Dashboard - Ejemplo de mapa base</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+    <!-- ===== HEADER CON TÍTULO Y LOGOS ===== -->
+    <header id="mainHeader">
+        <div class="header-logo-left">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' fill='%233498db' rx='8'/%3E%3Ctext x='30' y='38' font-size='28' text-anchor='middle' fill='white' font-family='Arial'%3E🌐%3C/text%3E%3C/svg%3E" 
+                 alt="Logo izquierdo" 
+                 class="header-logo-img"
+                 id="logoLeft"
+                 title="Logo izquierdo (reemplazar con tu imagen)" />
+        </div>
+        <h1 class="header-title">
+            <i class="fas fa-map-marked-alt"></i>
+            Ejemplo de mapa base
+            <span class="header-subtitle">GIS Dashboard</span>
+        </h1>
+        <div class="header-logo-right">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' fill='%2327ae60' rx='8'/%3E%3Ctext x='30' y='38' font-size='28' text-anchor='middle' fill='white' font-family='Arial'%3E🗺️%3C/text%3E%3C/svg%3E" 
+                 alt="Logo derecho" 
+                 class="header-logo-img"
+                 id="logoRight"
+                 title="Logo derecho (reemplazar con tu imagen)" />
+        </div>
+    </header>
+
+    <!-- ===== LOADING ===== -->
+    <div id="loading">
+        <div class="loader"></div>
+        <p>Cargando mapa...</p>
+        <small id="loadingStatus" style="margin-top:10px;color:#888;">Inicializando...</small>
+    </div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar">
+        <header class="sidebar-header">
+            <h2><i class="fas fa-map"></i> GIS Dashboard</h2>
+            <button id="toggleSidebar" class="btn-icon">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </header>
+
+        <!-- Capas -->
+        <section class="panel">
+            <h3><i class="fas fa-layer-group"></i> Capas</h3>
+            <div id="layerList"></div>
+        </section>
+
+        <!-- Dibujo -->
+        <section class="panel">
+            <h3><i class="fas fa-pencil-ruler"></i> Dibujar</h3>
+            <div class="draw-tools">
+                <button class="btn-draw" data-tool="polygon"><i class="fas fa-draw-polygon"></i> Polígono</button>
+                <button class="btn-draw" data-tool="rectangle"><i class="fas fa-square"></i> Rectángulo</button>
+                <button class="btn-draw" data-tool="circle"><i class="fas fa-circle"></i> Círculo</button>
+                <button class="btn-draw" data-tool="marker"><i class="fas fa-map-pin"></i> Marcador</button>
+                <button class="btn-draw" data-tool="polyline"><i class="fas fa-route"></i> Línea</button>
+            </div>
+        </section>
+
+        <!-- Acciones rápidas -->
+        <section class="panel actions">
+            <button id="clearAll" class="btn-danger"><i class="fas fa-trash"></i> Limpiar</button>
+            <button id="exportSelected" class="btn-success"><i class="fas fa-check-double"></i> Sel.</button>
+            <button id="exportGeoJSON" class="btn-success"><i class="fas fa-code"></i> GeoJSON</button>
+            <button id="exportKML" class="btn-success"><i class="fas fa-file-alt"></i> KML</button>
+            <button id="exportExcel" class="btn-success"><i class="fas fa-file-excel"></i> Excel</button>
+        </section>
+    </aside>
+
+    <!-- ===== MAPA ===== -->
+    <main id="mapContainer">
+        <div id="map"></div>
+        
+        <!-- ===== LISTA DE PREDIOS (abajo del mapa) ===== -->
+        <div id="prediosPanel">
+            <div class="predios-header">
+                <h3><i class="fas fa-landmark"></i> Predios (<span id="predioCount">0</span>)</h3>
+                <div class="predios-actions">
+                    <button id="selectAllPredios" class="btn-icon-small" title="Seleccionar todos">
+                        <i class="fas fa-check-double"></i>
+                    </button>
+                    <button id="deselectAllPredios" class="btn-icon-small" title="Deseleccionar todos">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <button id="togglePrediosPanel" class="btn-icon-small" title="Colapsar/Expandir">
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="predioList" class="predio-list-container">
+                <p class="empty">Sin predios. ¡Dibuja uno!</p>
+            </div>
+        </div>
+
+        <!-- Status bar -->
+        <footer id="statusBar">
+            <span id="coordStatus">📍 -</span>
+            <span id="zoomStatus">🔍 -</span>
+            <span id="layerStatus">📚 0</span>
+            <span id="predioStatus">📌 0</span>
+            <span id="selectedStatus">✅ 0</span>
+        </footer>
+    </main>
+
+    <!-- ===== MODAL PROPIEDADES ===== -->
+    <div id="propertyModal" class="modal">
+        <div class="modal-content">
+            <header class="modal-header">
+                <h3><i class="fas fa-edit"></i> Propiedades del Predio</h3>
+                <button class="close-modal">&times;</button>
+            </header>
+            <div class="modal-body">
+                <form id="propertyForm">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="predioNombre" placeholder="Ej: Lote 5" />
+                    </div>
+                    <div class="form-group">
+                        <label>Área (m²)</label>
+                        <input type="number" id="predioArea" step="0.01" />
+                    </div>
+                    <div class="form-group">
+                        <label>Propietario</label>
+                        <input type="text" id="predioPropietario" placeholder="Nombre" />
+                    </div>
+                    <div class="form-group">
+                        <label>Uso de suelo</label>
+                        <select id="predioUso">
+                            <option value="residencial">Residencial</option>
+                            <option value="comercial">Comercial</option>
+                            <option value="industrial">Industrial</option>
+                            <option value="agricola">Agrícola</option>
+                            <option value="mixto">Mixto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Color</label>
+                        <input type="color" id="predioColor" value="#4CAF50" />
+                    </div>
+                    <div class="form-group">
+                        <label>Notas</label>
+                        <textarea id="predioNotas" rows="2" placeholder="Observaciones..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <footer class="modal-footer">
+                <button id="saveProperties" class="btn-primary"><i class="fas fa-save"></i> Guardar</button>
+                <button id="deletePredio" class="btn-danger"><i class="fas fa-trash"></i> Eliminar</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- ===== MODAL SIMBOLOGÍA ===== -->
+    <div id="symbolModal" class="modal">
+        <div class="modal-content" style="max-width:500px;">
+            <header class="modal-header">
+                <h3><i class="fas fa-palette"></i> Simbología de Capa</h3>
+                <button class="close-symbol-modal">&times;</button>
+            </header>
+            <div class="modal-body">
+                <div id="symbolConfig">
+                    <div class="form-group">
+                        <label>Capa seleccionada:</label>
+                        <select id="symbolLayerSelect" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
+                            <option value="">Selecciona una capa</option>
+                        </select>
+                    </div>
+                    <div id="symbolFields">
+                        <div class="form-group">
+                            <label>Campo para simbología:</label>
+                            <select id="symbolFieldSelect" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
+                                <option value="">-- Seleccionar campo --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de simbología:</label>
+                            <select id="symbolTypeSelect" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;">
+                                <option value="categorica">Categórica</option>
+                                <option value="numerica">Numérica (gradiente)</option>
+                            </select>
+                        </div>
+                        <div id="symbolColorsContainer">
+                            <div class="form-group">
+                                <label>Colores (separados por coma):</label>
+                                <input type="text" id="symbolColors" value="#4CAF50,#2196F3,#FF9800,#E91E63" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;" />
+                            </div>
+                        </div>
+                    </div>
+                    <button id="applySymbols" class="btn-primary" style="width:100%;margin-top:10px;">
+                        <i class="fas fa-check"></i> Aplicar Simbología
+                    </button>
+                </div>
+                <div id="symbolPreview" style="margin-top:15px;display:none;">
+                    <h4 style="font-size:13px;color:#555;margin-bottom:8px;">Vista previa:</h4>
+                    <div id="symbolPreviewList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL EXTRACCIÓN ===== -->
+    <div id="extractModal" class="modal">
+        <div class="modal-content" style="max-width:550px;">
+            <header class="modal-header">
+                <h3><i class="fas fa-cut"></i> Extraer Información</h3>
+                <button class="close-extract-modal">&times;</button>
+            </header>
+            <div class="modal-body">
+                <div id="extractConfig">
+                    <div class="form-group">
+                        <label>Predio seleccionado:</label>
+                        <div id="extractPredioInfo" style="padding:8px;background:#f5f5f5;border-radius:6px;font-weight:600;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Capas base para extraer:</label>
+                        <div id="extractLayerList"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Campos a incluir:</label>
+                        <div id="extractFieldsContainer">
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;" id="extractFieldsList"></div>
+                        </div>
+                    </div>
+                    <button id="executeExtract" class="btn-primary" style="width:100%;margin-top:10px;">
+                        <i class="fas fa-file-export"></i> Extraer y Exportar a Excel
+                    </button>
+                </div>
+                <div id="extractResult" style="margin-top:15px;display:none;">
+                    <h4 style="font-size:13px;color:#555;margin-bottom:8px;">Resultado:</h4>
+                    <div id="extractResultContent" style="max-height:200px;overflow-y:auto;background:#f8f9fa;padding:10px;border-radius:6px;font-size:12px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL ESTADÍSTICAS ===== -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content" style="max-width:700px;max-height:90vh;">
+            <header class="modal-header">
+                <h3><i class="fas fa-chart-bar"></i> Estadísticas de Extracción</h3>
+                <button class="close-stats-modal">&times;</button>
+            </header>
+            <div class="modal-body" style="max-height:calc(90vh - 70px);overflow-y:auto;">
+                <div class="stats-controls">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+                        <div class="form-group">
+                            <label>Capa:</label>
+                            <select id="statsLayerSelect" style="width:100%;padding:6px 10px;border:1px solid #ddd;border-radius:4px;">
+                                <option value="">Seleccionar capa</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de gráfico:</label>
+                            <select id="statsChartType" style="width:100%;padding:6px 10px;border:1px solid #ddd;border-radius:4px;">
+                                <option value="bar">Barras</option>
+                                <option value="pie">Pastel</option>
+                                <option value="line">Línea</option>
+                                <option value="doughnut">Dona</option>
+                                <option value="polarArea">Área Polar</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+                        <div class="form-group">
+                            <label>Campo X (Etiquetas):</label>
+                            <select id="statsFieldX" style="width:100%;padding:6px 10px;border:1px solid #ddd;border-radius:4px;">
+                                <option value="">Seleccionar campo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Campo Y (Valores):</label>
+                            <select id="statsFieldY" style="width:100%;padding:6px 10px;border:1px solid #ddd;border-radius:4px;">
+                                <option value="Cobertura (%)">Cobertura (%)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div id="statsChartContainer" style="position:relative;height:350px;width:100%;display:none;">
+                    <canvas id="statsChart"></canvas>
+                </div>
+                <div id="statsDataTable" style="margin-top:15px;display:none;max-height:200px;overflow-y:auto;background:#f8f9fa;border-radius:6px;padding:10px;font-size:11px;">
+                    <h4 style="font-size:12px;color:#555;margin-bottom:6px;">Datos:</h4>
+                    <div id="statsTableContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LIBRERÍAS ===== -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+
+    <!-- ===== APP ===== -->
+    <script src="js/app.js"></script>
+</body>
+</html>
