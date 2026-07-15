@@ -1,7 +1,7 @@
 {
   "nombre": "GIS Dashboard",
   "version": "1.0",
-  "centro": [20.646573, -103.278604],
+  "centro": [20.646, -103.278],
   "zoom": 7,
   "capas": [
     {
