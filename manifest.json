@@ -1,0 +1,74 @@
+{
+  "nombre": "GIS Dashboard",
+  "version": "1.0",
+  "centro": [20.646573, -103.278604],
+  "zoom": 7,
+  "capas": [
+    {
+      "id": "anp_est",
+      "nombre": "anp_est",
+      "archivo": "data/anp_est.geojson",
+      "tipo": "geojson",
+      "visible": true,
+      "color": "#4CAF50",
+      "opacidad": 0.6,
+      "popup": ["NOMBRE", "TIPO","CAT_DEC","ENLACE_DEC"],
+      "etiquetas": ["Nombre:", "Tipo:","Declaratoria:","Enlace:"]
+    },
+    {
+      "id": "anp_fed",
+      "nombre": "anp_fed",
+      "archivo": "data/anp_fed.geojson",
+      "tipo": "geojson",
+      "visible": false,
+      "color": "#2196F3",
+      "opacidad": 0.4,
+      "popup": ["ID_ANP", "NOMBRE"],
+      "etiquetas": ["ID:", "NOMBRE:"]
+    },
+    {
+      "id": "humedal",
+      "nombre": "Humedales",
+      "archivo": "data/humedal.geojson",
+      "tipo": "geojson",
+      "visible": false,
+      "color": "#e74c3c",
+      "opacidad": 0.8,
+      "popup": ["NOMBRE", "SISTEMA","SUBCLASE"],
+      "etiquetas": ["Nombre:", "Sistema:", "Subclase:"]
+    },
+      {
+      "id": "pol_etj",
+      "nombre": "pol_etj",
+      "archivo": "data/pol_etj.geojson",
+      "tipo": "geojson",
+      "visible": false,
+      "color": "#e74c3c",
+      "opacidad": 0.8,
+      "popup": ["NOMBRES", "LENGTH"],
+      "etiquetas": ["Nombre:", "Longitud:"]
+    },
+      {
+      "id": "usyv7",
+      "nombre": "usyv7",
+      "archivo": "data/usyv7.geojson",
+      "tipo": "geojson",
+      "visible": false,
+      "color": "#e74c3c",
+      "opacidad": 0.8,
+      "popup": ["DESCRIPCIO", "codigo"],
+      "etiquetas": ["Nombre:", "codigo:"]
+    },
+    {
+      "id": "municipios",
+      "nombre": "Municipios",
+      "archivo": "data/municipios.geojson",
+      "tipo": "geojson",
+      "visible": false,
+      "color": "#FF9800",
+      "opacidad": 1,
+      "popup": ["NOMGEO", "CVEGEO"],
+      "etiquetas": ["Nombre municipio:", "Clave:"]
+    }
+  ]
+}
